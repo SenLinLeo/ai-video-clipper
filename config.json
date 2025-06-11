@@ -1,0 +1,50 @@
+{
+  "inputDir": "/Volumes/Data/download-1",
+  "outputDir": "/Volumes/Data/output-1",
+  "audioBitrate": "112k",
+  "maxConcurrentVideos": 10,
+  "maxConcurrentConfigs": 50,
+  "batchSize": 20,
+  "videoConfigs": [
+    {
+      "Width": 1008,
+      "Height": 1008,
+      "ClipDuration": 20,
+      "Speed": 2.0,
+      "VideoBitrate": 4000,
+      "ClipStrategy": "start_segments",
+      "OutputSuffix": "_square_start",
+      "OutputFolder": "1008x1008_start"
+    },
+    {
+      "Width": 1008,
+      "Height": 762,
+      "ClipDuration": 20,
+      "Speed": 2.0,
+      "VideoBitrate": 4000,
+      "ClipStrategy": "start_segments",
+      "OutputSuffix": "_rect_start",
+      "OutputFolder": "1008x762_start"
+    },
+    {
+      "Width": 1008,
+      "Height": 1008,
+      "ClipDuration": 20,
+      "Speed": 2.0,
+      "VideoBitrate": 4000,
+      "ClipStrategy": "end_segments",
+      "OutputSuffix": "_square_end",
+      "OutputFolder": "1008x1008_end"
+    },
+    {
+      "Width": 1008,
+      "Height": 762,
+      "ClipDuration": 20,
+      "Speed": 2.0,
+      "VideoBitrate": 4000,
+      "ClipStrategy": "end_segments",
+      "OutputSuffix": "_rect_end",
+      "OutputFolder": "1008x762_end"
+    }
+  ]
+} 
