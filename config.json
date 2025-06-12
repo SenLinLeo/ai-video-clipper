@@ -1,10 +1,11 @@
 {
-  "inputDir": "/Volumes/Data/download-1",
-  "outputDir": "/Volumes/Data/output-1",
+  "inputDir": "/Volumes/Data/download-2",
+  "outputDir": "/Volumes/Data/output-2",
   "audioBitrate": "112k",
-  "maxConcurrentVideos": 10,
-  "maxConcurrentConfigs": 50,
+  "maxConcurrentVideos": 20,
+  "maxConcurrentConfigs": 60,
   "batchSize": 20,
+  "qualityPreset": "high",
   "videoConfigs": [
     {
       "Width": 1008,

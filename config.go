@@ -6,6 +6,18 @@ import (
 	"os"
 )
 
+// VideoConfig 视频配置
+type VideoConfig struct {
+	Width        int     `json:"Width"`        // 视频宽度
+	Height       int     `json:"Height"`       // 视频高度
+	ClipDuration int     `json:"ClipDuration"` // 剪辑时长（秒）
+	Speed        float64 `json:"Speed"`        // 播放速度倍数
+	VideoBitrate int     `json:"VideoBitrate"` // 视频比特率(kbps)
+	ClipStrategy string  `json:"ClipStrategy"` // 剪辑策略
+	OutputSuffix string  `json:"OutputSuffix"` // 输出文件后缀
+	OutputFolder string  `json:"OutputFolder"` // 输出文件夹
+}
+
 // Config 全局配置
 type Config struct {
 	InputDir             string        `json:"inputDir"`
@@ -14,6 +26,7 @@ type Config struct {
 	MaxConcurrentVideos  int           `json:"maxConcurrentVideos"`
 	MaxConcurrentConfigs int           `json:"maxConcurrentConfigs"`
 	BatchSize            int           `json:"batchSize"`
+	QualityPreset        string        `json:"qualityPreset"`
 	VideoConfigs         []VideoConfig `json:"videoConfigs"`
 }
 
@@ -60,6 +73,7 @@ func GetDefaultConfig() *Config {
 		MaxConcurrentVideos:  10,
 		MaxConcurrentConfigs: 50,
 		BatchSize:            20,
+		QualityPreset:        "high",
 		VideoConfigs: []VideoConfig{
 			{
 				Width:        1008,

@@ -40,6 +40,144 @@
 - **像素格式**: YUV420P (兼容性最佳)
 - **音频采样率**: 48kHz
 
+## 🎬 视频压缩算法优化
+
+### 📋 优化概述
+
+将原本的简单FFmpeg编码参数升级为智能化、分层次的高效压缩系统，在保持画质的前提下优化文件大小和编码速度。
+
+### ✨ 核心优化特性
+
+#### 1. 🎯 三层质量预设系统
+- **Fast** (`fast`): 快速编码，适合大批量处理
+- **High** (`high`): 高质量编码，平衡质量与速度 ⭐ **默认**
+- **Ultra** (`ultra`): 超高质量，追求极致画质
+
+#### 2. 🔄 两阶段编码策略
+- **第一阶段（剪辑）**: 使用快速预设，保证处理速度
+- **第二阶段（最终输出）**: 使用指定质量预设，保证最终质量
+
+#### 3. 🧠 智能编码参数
+##### Fast预设优化
+```
+- Preset: faster
+- CRF: 23 (平衡质量和文件大小)
+- B帧: 3个
+- 参考帧: 2个
+- 运动估计: hex (快速)
+- 子像素精度: 6级
+```
+
+##### High预设优化
+```
+- Preset: slow
+- CRF: 20 (高质量)
+- B帧: 5个
+- 参考帧: 5个
+- 运动估计: umh (高精度)
+- 子像素精度: 8级
+```
+
+##### Ultra预设优化
+```
+- Preset: veryslow
+- CRF: 18 (超高质量)
+- B帧: 8个
+- 参考帧: 8个
+- 运动估计: tesa (最高精度)
+- 子像素精度: 10级
+```
+
+#### 4. 🎨 心理视觉优化
+- **启用心理视觉RD优化**: 提升主观画质
+- **心理视觉Trellis**: 减少视觉瑕疵
+- **自适应去块滤波**: 消除块效应
+
+#### 5. ⚡ 高级编码技术
+- **CABAC熵编码**: 提高压缩效率
+- **混合8x8 DCT**: 提升细节表现
+- **Trellis量化**: 优化量化过程
+- **宏块树分析**: 智能比特率分配
+
+### 🎛️ 压缩质量配置
+
+#### 在config.json中设置质量预设
+```json
+{
+  "inputDir": "/Volumes/Data/youtube-download",
+  "outputDir": "/Volumes/Data/output",
+  "qualityPreset": "high",  // fast, high, ultra
+  "maxConcurrentVideos": 10,
+  "maxConcurrentConfigs": 50,
+  "batchSize": 20
+}
+```
+
+#### 智能预设选择逻辑
+如果未指定`qualityPreset`，系统会根据批处理大小自动选择：
+- 批量 > 50个: 自动选择`fast`
+- 批量 10-50个: 自动选择`high`
+- 批量 < 10个: 自动选择`ultra`
+
+### 📊 性能对比
+
+| 质量预设 | 编码速度 | 文件大小 | 主观质量 | 适用场景 |
+|---------|---------|---------|---------|---------|
+| Fast    | ⚡⚡⚡⚡⚡ | 📦📦📦   | ⭐⭐⭐   | 大批量处理 |
+| High    | ⚡⚡⚡     | 📦📦     | ⭐⭐⭐⭐  | 平衡质量速度 |
+| Ultra   | ⚡       | 📦       | ⭐⭐⭐⭐⭐ | 高质量精品 |
+
+### 🔬 技术细节
+
+#### CRF vs 比特率模式
+- **第一阶段**: 使用比特率模式，保证编码速度和一致性
+- **第二阶段**: 使用CRF模式，保证最佳视觉质量
+
+#### x264高级选项
+```bash
+# 示例：High预设的x264选项
+-x264opts bframes=5:ref=5:me=umh:subme=8:trellis=2:keyint=50:min-keyint=25:scenecut=40:psy-rd=1.0:0.1:psy-trellis=0.1:deblock=-1:-1:cabac=1:8x8dct=1
+```
+
+#### 码率控制优化
+- **最大码率**: 目标码率的1.5倍（CRF模式）或1.2倍（比特率模式）
+- **缓冲区**: 目标码率的2倍，保证稳定编码
+- **GOP结构**: 50帧关键帧间隔，25帧最小间隔
+
+### 🎯 质量保证
+
+#### 画质无损优化
+1. **保持原始色彩空间**: yuv420p
+2. **高精度运动估计**: umh/tesa算法
+3. **心理视觉优化**: 提升主观感受
+4. **智能场景检测**: 自动处理场景切换
+
+#### 兼容性保证
+- **H.264 High Profile Level 4.1**: 广泛设备支持
+- **AAC音频编码**: 保持音质和兼容性
+- **FastStart优化**: 支持网络流播放
+
+### 📈 批量处理推荐
+- **大量视频(>100个)**: 使用`fast`预设
+- **中等批量(20-100个)**: 使用`high`预设
+- **精品制作(<20个)**: 使用`ultra`预设
+
+### 🔧 自定义调优
+
+如需进一步自定义，可以修改`main.go`中的`VideoQualityParams`结构体参数：
+
+```go
+// 示例：自定义超高质量预设
+case QualityUltra:
+    return VideoQualityParams{
+        Preset:      "veryslow",
+        CRF:         16,  // 更高质量
+        BFrames:     10,  // 更多B帧
+        RefFrames:   10,  // 更多参考帧
+        // ... 其他参数
+    }
+```
+
 ## 📂 目录结构
 
 ### 输入结构
@@ -84,9 +222,15 @@ brew install ffmpeg
 ```
 
 #### 2. 编译程序
+
 ```bash
-go build -o video-clipper .
+# 编译DDD版本（推荐）
+cd cmd/clipper
+go build -o ../../video-clipper .
+cd ../..
 ```
+
+**注意**: 原版本已归档到`legacy/`目录，推荐使用DDD架构版本。
 
 #### 3. 准备视频文件
 ```bash
@@ -96,27 +240,28 @@ cp /path/to/your/videos/* input/
 ```
 
 #### 4. 执行批处理
+
 ```bash
-# 使用默认目录 (input -> output)
+# 批量处理
 ./video-clipper
 
-# 自定义目录
-./video-clipper my_input my_output
+# 处理单个文件
+./video-clipper input.mp4
 
-# 使用配置文件
-./video-clipper input output config.json
+# 使用自定义配置
+./video-clipper input.mp4 custom-config.json
 ```
 
 ### 使用脚本
 
 #### 一键设置环境
 ```bash
-./setup.sh
+./scripts/setup.sh
 ```
 
 #### 快速演示
 ```bash
-./demo.sh
+./scripts/demo.sh
 ```
 
 ## ⚡ 并发处理
@@ -195,6 +340,10 @@ type ClipCalculator interface {
   "inputDir": "input",
   "outputDir": "output",
   "audioBitrate": "112k",
+  "qualityPreset": "high",
+  "maxConcurrentVideos": 10,
+  "maxConcurrentConfigs": 50,
+  "batchSize": 20,
   "videoConfigs": [
     {
       "Width": 1008,
@@ -211,8 +360,19 @@ type ClipCalculator interface {
 }
 ```
 
-### VideoConfig 结构
+### Config 完整结构
 ```go
+type Config struct {
+    InputDir             string        // 输入目录
+    OutputDir            string        // 输出目录
+    AudioBitrate         string        // 音频比特率
+    QualityPreset        string        // 质量预设: fast, high, ultra
+    MaxConcurrentVideos  int           // 最大并发视频数
+    MaxConcurrentConfigs int           // 最大并发配置数
+    BatchSize            int           // 批处理大小
+    VideoConfigs         []VideoConfig // 视频配置列表
+}
+
 type VideoConfig struct {
     Width          int     // 视频宽度
     Height         int     // 视频高度
@@ -374,7 +534,142 @@ const (
 )
 ```
 
+## 🏗️ DDD架构重构
+
+### 重构概述
+
+本项目已使用领域驱动设计(DDD)思想进行重构，保持最小改动的同时提升了代码的可维护性和可扩展性。
+
+### 架构变化
+
+#### 原架构（已归档）
+```
+legacy/
+├── main_legacy.go (1070行)   # 原版本主程序（已归档）
+├── errgroup_legacy.go        # 并发控制（已归档）
+└── config.go                 # 配置管理
+```
+
+#### 新DDD架构
+```
+cmd/clipper/main.go                          # 应用入口
+internal/
+├── domain/                                  # 领域层
+│   ├── entities/                           # 实体
+│   │   ├── video.go                        # 视频实体
+│   │   └── processing_config.go            # 处理配置实体
+│   ├── repositories/                       # 仓储接口
+│   │   ├── video_repository.go             # 视频仓储接口
+│   │   └── config_repository.go            # 配置仓储接口
+│   └── services/                           # 领域服务
+│       └── path_service.go                 # 路径服务
+├── application/                            # 应用层
+│   ├── dto/                                # 数据传输对象
+│   │   └── video_processing_dto.go         # 视频处理DTO
+│   └── usecases/                           # 用例
+│       └── video_processing_usecase.go     # 视频处理用例
+├── infrastructure/                         # 基础设施层
+│   ├── config/                             # 配置实现
+│   │   └── config_repository_impl.go       # 配置仓储实现
+│   └── ffmpeg/                             # FFmpeg实现
+│       └── video_repository_impl.go        # 视频仓储实现
+└── interface/                              # 接口层
+    └── cli/                                # CLI接口
+        └── video_cli.go                    # CLI实现
+```
+
+### DDD核心改进
+
+#### 1. 关注点分离
+- **领域层**: 纯业务逻辑，不依赖任何技术实现
+- **应用层**: 编排业务流程，定义用例
+- **基础设施层**: 技术实现细节（FFmpeg、文件I/O）
+- **接口层**: 外部交互适配器
+
+#### 2. 依赖倒置
+- 领域层定义接口，基础设施层实现接口
+- 高层模块不依赖低层模块，都依赖抽象
+
+#### 3. 单一职责
+- 每个类/函数都有明确的单一职责
+- 视频实体只关心视频属性和验证
+- 配置实体只关心配置验证和计算
+- 仓储只关心数据访问
+
+#### 4. 可测试性
+- 通过接口注入依赖，便于单元测试
+- 业务逻辑与技术实现分离
+
+### DDD版本使用方式
+
+#### 编译和运行
+```bash
+# 编译
+cd cmd/clipper
+go build -o ../../video-clipper .
+cd ../..
+
+# 批量处理
+./video-clipper
+
+# 处理单个文件
+./video-clipper input.mp4
+
+# 使用自定义配置
+./video-clipper input.mp4 custom-config.json
+```
+
+### 兼容性保证
+
+- 完全兼容原有的配置文件格式
+- 保持相同的命令行接口
+- 输出结果与原版本一致
+
+### 扩展性提升
+
+新DDD架构便于扩展：
+
+1. **新的视频格式支持**: 在`Video`实体中添加格式验证
+2. **新的处理策略**: 在`ProcessingConfig`实体中添加策略
+3. **新的输出格式**: 实现新的`VideoRepository`
+4. **新的配置源**: 实现新的`ConfigRepository`
+5. **新的接口**: 添加HTTP API、gRPC等接口层
+
+### DDD性能特性
+
+- 保持原有的并发处理能力
+- 通过接口抽象，便于性能优化
+- 可独立优化各层实现
+
+### DDD代码质量
+
+- 函数长度控制在50行以内
+- 遵循SOLID原则
+- 清晰的错误处理
+- 完整的类型安全
+
+### 版本说明
+
+项目已完全迁移到DDD架构：
+- **当前版本**: `video-clipper` - DDD重构版本（领域驱动设计）
+- **归档版本**: `legacy/` - 原版本（面向对象设计，已归档）
+
+推荐使用DDD版本，具有更好的可维护性和可扩展性。
+
 ## 📝 变更日志
+
+### v4.1.0 (架构简化版) - 2024-01-06
+- 🎯 简化为单一DDD版本，原版本归档到`legacy/`
+- 🏗️ 统一使用`video-clipper`作为可执行文件名
+- 📁 重新组织目录结构：`scripts/`存放脚本，`legacy/`存放归档文件
+- 🔧 更新所有脚本和文档，指向DDD版本
+
+### v4.0.0 (DDD重构版) - 2024-01-06
+- 🏗️ 使用DDD思想重构整体架构
+- 🎯 四层架构：领域层、应用层、基础设施层、接口层
+- 🔧 依赖倒置和关注点分离
+- ⚡ 保持原有高并发处理能力
+- 📊 提升代码可维护性和可扩展性
 
 ### v3.0.0 (高并发版) - 2024-01-06
 - 🚀 增加高并发处理支持（最多100个视频同时处理）
@@ -403,4 +698,4 @@ MIT License - 详见 LICENSE 文件
 
 **项目地址**: `ai-video-clipper/`
 **技术栈**: Go + FFmpeg + errgroup并发
-**架构模式**: 面向对象 + 接口设计 + 高并发处理
+**架构模式**: 面向对象 + 接口设计 + 高并发处理 + DDD领域驱动设计

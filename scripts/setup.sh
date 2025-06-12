@@ -21,7 +21,9 @@ fi
 
 # 编译程序
 echo "🔨 正在编译视频剪辑器..."
-go build -o video-clipper .
+cd ../cmd/clipper
+go build -o ../../video-clipper .
+cd ../../scripts
 
 if [ $? -eq 0 ]; then
     echo "✅ 编译成功"
